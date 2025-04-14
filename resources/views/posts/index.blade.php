@@ -121,14 +121,15 @@
                             </form>
 
                             <!-- Bottom-Right Corner -->
-                            <div class="fixed bottom-6 right-6">
-                                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full">
-                                    <a href="{{ route('posts.create') }}">
-                                        New Post
-                                    </a>
-                                </button>
-                            </div>
-
+                            @auth
+                                <div class="fixed bottom-6 right-6">
+                                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full">
+                                        <a href="{{ route('posts.create') }}">
+                                            New Post
+                                        </a>
+                                    </button>
+                                </div>
+                            @endauth
                         </div>
                     </div>
                 </div>
