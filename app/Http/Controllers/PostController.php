@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Post;
+use App\Models\Province;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -12,10 +13,48 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $posts = Post::with('comments')->latest()->get();
-        return view('posts.index', compact('posts'));
+        $query = Post::with(['province', 'user']);
+
+        // Apply province filter
+        if ($request->filled('province_id')) {
+            $query->where('province_id', $request->province_id);
+        }
+
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply sorting
+        switch ($request->sort) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'most_viewed':
+                $query->orderBy('views', 'desc');
+                break;
+            case 'most_liked':
+                $query->orderBy('likes', 'desc');
+                break;
+            default:
+                $query->latest();
+        }
+
+        $posts = $query->paginate(12)->withQueryString();
+        $provinces = Province::orderBy('name')->get();
+
+        return view('posts.index', compact('posts', 'provinces'));
     }
 
     /**

@@ -50,6 +50,20 @@ class AdminPostController extends Controller
             $query->where('province_id', Auth::user()->province_id);
         }
 
+        switch ($request->input('sort')) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'most_viewed':
+                $query->orderBy('views', 'desc');
+                break;
+            case 'most_liked':
+                $query->orderBy('likes', 'desc');
+                break;
+            default:
+                $query->latest();
+        }
+
         $posts = $query->latest()->paginate(10)->withQueryString();
 
         $prefix = $this->getRoutePrefix();
